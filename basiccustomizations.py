@@ -30,6 +30,8 @@ ax1.plot(high, label='Price', linewidth=0.2)
 # для легенды
 ax1.plot([], [], label='loss', linewidth=0.5, color='r', alpha=0.5)
 ax1.plot([], [], label='gain', linewidth=0.5, color='g', alpha=0.5)
+# горизонтальная линия
+ax1.axhline(high['High'][0], color='k', linewidth=5)
 
 # залитый график
 # alpha - прозрачность заливки
@@ -41,7 +43,6 @@ ax1.fill_between(high.index,
                  where=(high['High'] > high['High'][0]),
                  facecolor='g',
                  alpha=1)
-
 ax1.fill_between(high.index,
                  high['High'],
                  high['High'][0],
@@ -56,10 +57,20 @@ for label in ax1.xaxis.get_ticklabels():
 # включаем сетку позади графика
 ax1.grid(True)
 # меняем цвет лэйблов
-ax1.xaxis.label.set_color('c')
-ax1.yaxis.label.set_color('r')
+#ax1.xaxis.label.set_color('c')
+#ax1.yaxis.label.set_color('r')
 # шаг по оси y
+#ax1.set_yticks([0, 25, 50, 75])
 ax1.set_yticks([0, 10, 20, 30, 40, 50])
+
+# настройки рамки области в которую заключен график
+ax1.spines['left'].set_color('c')
+ax1.spines['right'].set_visible(False)
+ax1.spines['top'].set_visible(False)
+ax1.spines['left'].set_linewidth(5)
+
+# по столбцу Х наши тики(даты) будут перекрашенны
+ax1.tick_params(axis='x', colors='#f06215')
 
 plt.xlabel('Date')
 plt.ylabel('Prices')
