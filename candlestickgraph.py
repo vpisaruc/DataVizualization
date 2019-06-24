@@ -3,11 +3,16 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 from mpl_finance import candlestick_ohlc
-import  datetime
-import pandas_datareader.data as web
+from matplotlib import style
 from pandas.plotting import register_matplotlib_converters
 import datetime as dt
 
+# сделаем наш график красивее
+style.use('fast')
+# распечатать все доступные стили
+#print(plt.style.available)
+# узнать где наша библиотека хранится
+print(plt.__file__)
 # чтобы не было warning
 register_matplotlib_converters()
 
@@ -33,7 +38,10 @@ fig = plt.figure()
 ax1 = plt.subplot2grid((1, 1), (0, 0))
 
 # делаем наш candlestick график
-candlestick_ohlc(ax1, df.values, width=0.4, colorup='g', colordown='r')
+#candlestick_ohlc(ax1, df.values, width=0.4, colorup='g', colordown='r')
+
+ax1.plot(df['Date'].values, df['Close'].values)
+ax1.plot(df['Date'].values, df['Open'].values)
 
 for label in ax1.xaxis.get_ticklabels():
     label.set_rotation(45)
