@@ -7,6 +7,20 @@ import pandas_datareader as web
 from mpl_finance import candlestick_ohlc
 from matplotlib import style
 from pandas.plotting import register_matplotlib_converters
+import numpy as np
+
+# окна для скользящей средней
+MA1 = 10
+MA2 = 30
+
+"""функция для вычисления скользящей средней"""
+def moving_average(values, window):
+    weight = np.repeat(1.0, window) / window
+    smas = np.convolve(values, weight, 'valid')
+    return smas
+
+def high_minus_low(highs, lows):
+    return highs - lows
 
 # сделаем наш график красивее
 style.use('fivethirtyeight')
@@ -30,7 +44,7 @@ df.drop(columns='Adj Close')
 cols = ['Date', 'Open', 'High', 'Low',  'Close', 'Volume']
 # меняем порядок колонок
 df = df[cols]
-df = df[:100]
+df = df[:500]
 
 # конвертируем колонку дат в формат матплотлиба
 df['Date'] = df['Date'].map(lambda x: mdates.datestr2num(x))
@@ -42,6 +56,14 @@ ax2 = plt.subplot2grid((6, 1), (1, 0), rowspan=4, colspan=1)
 plt.xlabel('Date')
 plt.ylabel('Prices')
 ax3 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1)
+
+ma1 = moving_average(df['Close'].values, MA1)
+ma2 = moving_average(df['Close'].values, MA2)
+start = len(df['Date'].values[MA2 - 1:])
+
+h_l = list(map(high_minus_low, df['High'].values, df['Low'].values))
+
+ax1.plot_date(df['Date'].values, h_l, '-')
 
 # делаем наш candlestick график
 candlestick_ohlc(ax2, df.values, width=0.4, colorup='g', colordown='r')
@@ -64,6 +86,8 @@ ax2.annotate(str(df['Close'].values[-1]),
              xytext=(df['Date'].values[-1] + 6, df['Close'].values[-1]),
              bbox=bbox_props)
 
+ax3.plot(df['Date'].values[-start:], ma1[-start:])
+ax3.plot(df['Date'].values[-start:], ma2[-start:])
 
 #plt.legend()
 # задание отступов от самой картинки до рамки
