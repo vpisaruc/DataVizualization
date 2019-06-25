@@ -33,10 +33,10 @@ register_matplotlib_converters()
 
 start = dt.datetime(2000, 1, 1)
 end = dt.datetime(2016, 12,  31)
-stock = 'EBAY'
+stock = 'GOOG'
 
-#df = web.DataReader(stock, 'yahoo', start, end)
-#df.to_csv('Datasets/dataset.csv')
+df = web.DataReader(stock, 'yahoo', start, end)
+df.to_csv('Datasets/dataset.csv')
 df = pd.read_csv('Datasets/dataset.csv')
 # удаляем ненужную колонку
 df.drop(columns='Adj Close')
@@ -56,6 +56,8 @@ plt.ylabel('H-L')
 # делаем единную систему отсчета по Х с помощью sharex
 ax2 = plt.subplot2grid((6, 1), (1, 0), rowspan=4, colspan=1, sharex = ax1)
 plt.ylabel('Prices')
+# twinx - тоже делает единую систуму отсчета по Х
+ax2volume = ax2.twinx()
 ax3 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex = ax1)
 plt.ylabel('MAvgs')
 
@@ -84,6 +86,16 @@ ax2.annotate(str(df['Close'].values[-1]),
              (df['Date'].values[-1], df['Close'].values[-1]),
              xytext=(df['Date'].values[-1] + 6, df['Close'].values[-1]),
              bbox=bbox_props)
+
+ax2volume.fill_between(df['Date'].values[-start:], 0,
+                       df['Volume'].values[-start:],
+                       facecolor='#0079a3',
+                       alpha=0.4)
+# Избавились от лэйблов
+ax2volume.axes.yaxis.set_ticklabels([])
+ax2volume.grid(False)
+# задаем лимит высоты графика по Y
+ax2volume.set_ylim(0, 3 * df['Volume'].values.max())
 
 ax3.plot(df['Date'].values[-start:], ma1[-start:], linewidth=1)
 ax3.plot(df['Date'].values[-start:], ma2[-start:], linewidth=1)
