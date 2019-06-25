@@ -52,10 +52,11 @@ df['Date'] = df['Date'].map(lambda x: mdates.datestr2num(x))
 fig = plt.figure()
 ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=1, colspan=1)
 plt.title(stock)
+plt.ylabel('H-L')
 ax2 = plt.subplot2grid((6, 1), (1, 0), rowspan=4, colspan=1)
-plt.xlabel('Date')
 plt.ylabel('Prices')
 ax3 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1)
+plt.ylabel('MAvgs')
 
 ma1 = moving_average(df['Close'].values, MA1)
 ma2 = moving_average(df['Close'].values, MA2)
@@ -64,17 +65,13 @@ start = len(df['Date'].values[MA2 - 1:])
 h_l = list(map(high_minus_low, df['High'].values, df['Low'].values))
 
 ax1.plot_date(df['Date'].values, h_l, '-')
+# prune - удаление тика
+ax1.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prue='lower'))
 
 # делаем наш candlestick график
 candlestick_ohlc(ax2, df.values, width=0.4, colorup='g', colordown='r')
 
-for label in ax2.xaxis.get_ticklabels():
-    label.set_rotation(45)
-
 # изменили формат дат с ужасного на нормальный
-ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-# сколько дат будет показанно по оси X
-ax2.xaxis.set_major_locator(mticker.MaxNLocator(10))
 ax2.grid(True)
 
 # настройки bbox
@@ -86,8 +83,32 @@ ax2.annotate(str(df['Close'].values[-1]),
              xytext=(df['Date'].values[-1] + 6, df['Close'].values[-1]),
              bbox=bbox_props)
 
-ax3.plot(df['Date'].values[-start:], ma1[-start:])
-ax3.plot(df['Date'].values[-start:], ma2[-start:])
+ax3.plot(df['Date'].values[-start:], ma1[-start:], linewidth=1)
+ax3.plot(df['Date'].values[-start:], ma2[-start:], linewidth=1)
+
+ax3.fill_between(df['Date'].values[-start:],
+                 ma2[-start:], ma1[-start:],
+                 where=(ma1[-start:] < ma2[-start:]),
+                 facecolor='r',
+                 edgecolor='r',
+                 alpha = 0.5)
+
+ax3.fill_between(df['Date'].values[-start:],
+                 ma2[-start:], ma1[-start:],
+                 where=(ma1[-start:] > ma2[-start:]),
+                 facecolor='g',
+                 edgecolor='g',
+                 alpha = 0.5)
+
+ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+# сколько дат будет показанно по оси X
+ax3.xaxis.set_major_locator(mticker.MaxNLocator(10))
+
+for label in ax3.xaxis.get_ticklabels():
+    label.set_rotation(45)
+
+plt.setp(ax1.get_xticklabels(), visible=False)
+plt.setp(ax2.get_xticklabels(), visible=False)
 
 #plt.legend()
 # задание отступов от самой картинки до рамки
