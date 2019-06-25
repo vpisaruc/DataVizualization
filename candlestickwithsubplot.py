@@ -53,9 +53,10 @@ fig = plt.figure()
 ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=1, colspan=1)
 plt.title(stock)
 plt.ylabel('H-L')
-ax2 = plt.subplot2grid((6, 1), (1, 0), rowspan=4, colspan=1)
+# делаем единную систему отсчета по Х с помощью sharex
+ax2 = plt.subplot2grid((6, 1), (1, 0), rowspan=4, colspan=1, sharex = ax1)
 plt.ylabel('Prices')
-ax3 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1)
+ax3 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex = ax1)
 plt.ylabel('MAvgs')
 
 ma1 = moving_average(df['Close'].values, MA1)
@@ -64,13 +65,14 @@ start = len(df['Date'].values[MA2 - 1:])
 
 h_l = list(map(high_minus_low, df['High'].values, df['Low'].values))
 
-ax1.plot_date(df['Date'].values, h_l, '-')
+ax1.plot_date(df['Date'].values[-start:], h_l[-start:], '-')
 # prune - удаление тика
-ax1.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prue='lower'))
+ax1.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='lower'))
 
 # делаем наш candlestick график
-candlestick_ohlc(ax2, df.values, width=0.4, colorup='g', colordown='r')
+candlestick_ohlc(ax2, df.values[-start:], width=0.4, colorup='g', colordown='r')
 
+ax2.yaxis.set_major_locator(mticker.MaxNLocator(nbins=7, prune='upper'))
 # изменили формат дат с ужасного на нормальный
 ax2.grid(True)
 
@@ -103,6 +105,8 @@ ax3.fill_between(df['Date'].values[-start:],
 ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 # сколько дат будет показанно по оси X
 ax3.xaxis.set_major_locator(mticker.MaxNLocator(10))
+ax3.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
+
 
 for label in ax3.xaxis.get_ticklabels():
     label.set_rotation(45)
